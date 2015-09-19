@@ -40,3 +40,10 @@
 13. Username: larry@radsot.com, Password: Z3lenzmej, Protocol: IMAP, IP address: 87.120.13.118, Domain: neterra.net, Port: 143
 
 14. 1 of 1 pair is legitmate.
+
+## Set 3
+
+## General Questions
+19. To verify the legitmacy, I used wireshark to look at the TCP streams that included a login attempt, and checked that the combination was accepted, which appeared as SUCCESS, 200, logged in, etc. after the login attempt
+
+20. When sending authentication information over the network, use a secure protocol, such as HTTPS, so that anything sent over the network is encrypted and more difficult to read.
