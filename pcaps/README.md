@@ -16,10 +16,27 @@
 7. 6 files were transferred.
 
 8. COaqQWnU8AAwX3K.jpg
+
    CDkv69qUsAAq8zN.jpg
+
    CNsAEaYUYAARuaj.jpg 
+
    CLu-m0MWoAAgjkr.jpg
+
    CKBXgmOWcAAtc4u.jpg
+
    CJoWmoOUkAAAYpx.jpg
 
 9. See other files in directory for extracted contents
+
+## Set 2
+
+10. There are 77982 packets in this set.
+
+11. 1 plaintext account was found in this set
+
+12. I used ettercap -T -r set2.pcap to output all packets, and piped that to grep several times using different account related keywords: user, pass, pswd, pwd, login, USER, PASS, PSWD, PWD, LOGIN.
+
+13. Username: larry@radsot.com, Password: Z3lenzmej, Protocol: IMAP, IP address: 87.120.13.118, Domain: neterra.net, Port: 143
+
+14. 1 of 1 pair is legitmate.
