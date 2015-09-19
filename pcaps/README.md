@@ -33,15 +33,37 @@
 
 10. There are 77982 packets in this set.
 
-11. 1 plaintext account was found in this set
+11. 1 username-password pair was found
+
+USER: larry@radsot.com, PASS: Z3lenzmej
 
 12. I used ettercap -T -r set2.pcap to output all packets, and piped that to grep several times using different account related keywords: user, pass, pswd, pwd, login, USER, PASS, PSWD, PWD, LOGIN.
 
-13. Username: larry@radsot.com, Password: Z3lenzmej, Protocol: IMAP, IP address: 87.120.13.118, Domain: neterra.net, Port: 143
+13. Username: larry@radsot.com, Password: Z3lenzmej, Protocol: IMAP, IP address: 87.120.13.118, Domain: 76.0d.78.57.d6.net, Port: 143
 
-14. 1 of 1 pair is legitmate.
+14. 1/1 pair is legitmate.
 
 ## Set 3
+15. 3 pairs were found:
+
+USER: seymore, PASS: butts
+
+USER: jeff, PASS: asdasdasd
+
+USER: nab01620@nifty.com, PASS: Nifty->takirin1
+
+16. 
+
+Username: nab01620@nifty.com, Password: Nifty->takirin1, Protocol: IMAP, IP address: 210.131.4.155, Domain: N/A IP did not resolve to a domain, Port: 143
+
+Username: seymore, Password: butts, Protocol: HTTP, IP address: 162.22.171.208, Domain: forum.defcon.org, Port: 80
+
+Username: jeff, Password: asdasdasd, Protocol: HTTP, IP address: 54.191.109.23, Domain:ec2-54-191-109-23.us-west-2.compute.amazonaws.com, Port: 80
+
+
+17. 1/3 pairs is legitmate. The legitimacy of the "jeff" account could not be definitively verified, but is likely illegitimate based on info from the packets containing that login being found in conversations that involve unauthorized in the response. That is either due to a browser not supplying credentials correctly or the password being incorrect.
+
+18. The list of IP address-host mappings can be found in the file set3-ip-host.txt. This list was found by using Wireshark's address resolution tool.
 
 ## General Questions
 19. To verify the legitmacy, I used wireshark to look at the TCP streams that included a login attempt, and checked that the combination was accepted, which appeared as SUCCESS, 200, logged in, etc. after the login attempt
