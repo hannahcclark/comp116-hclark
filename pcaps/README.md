@@ -49,7 +49,7 @@
 
 17) 1/3 pairs (nab01620@nifty.com:Nifty->takirin1) is legitmate. jeff:asdasdasd is most likely illegitimate based on info from the packets containing that login being found in conversations that involve unauthorized in the response. That is either due to a browser not supplying credentials correctly or the password being incorrect, so it cannot be definitively marked as illegitimate, although it most likely is. The legitimacy of the seymore:butts login could not be determined. The response in TCP streams with that login was that the resource was forbidden to access over HTTP, so it is unclear as to whether the login would be valid if the user were using https to access the resource.
 
-18) The list of IP address-host mappings can be found in the file set3-ip-host.txt. The list does not contain IP addresses that do not map to a domain name. A list of all IP addresses including those without domain mappings can be found in the file set3-all-ips.txt. These lists was found by using Wireshark's address resolution tool.
+18) The list of IP address-host mappings can be found in the file set3-ip-host.txt. The list does not contain IP addresses that do not map to a domain name. A list of all IP addresses including those without domain mappings can be found in the file set3-all-ips.txt. These lists wer found using Wireshark's address resolution tool.
 
 ## General Questions
 19) To verify the legitmacy, I used wireshark to look at the TCP streams that included a login attempt, and checked that the combination was accepted, which appeared as SUCCESS, 200, logged in, etc. after the login attempt, or looked for indications that it was denied, such as unauthorized.
