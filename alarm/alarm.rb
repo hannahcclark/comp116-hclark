@@ -26,10 +26,11 @@ class Alarm
             if packet.payload() =~ /(.*)Nikto(.*)/
                 puts "Nikto"
             end
-            if (packet.payload() =~ 
-                 /(.*)(((3|4|5)\d{3})|6011)(((-| )?\d{4}){3})(.*)/)
-                puts "Credit Card
+            if packet.payload() =~ \
+                 /(.*)(((3|4|5)\d{3})|6011)(((-| )?\d{4}){3})(.*)/
+                puts "Credit Card"
             end
+            puts packet.payload()
         end
     end
 end
