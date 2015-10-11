@@ -66,12 +66,15 @@ class Alarm
     # Search through packets, either a live stream or list from a pcap file for
     # incidents, including Nmap NULL, FIN, and Xmas scans, other somewhat
     # obvious Nmap scans, Nikto scans, and plaintext credit card leaks.
+    # Packets may be either raw or already parsed.
     #
     def search_packets(packets)
         incidents = 0
-        packets.each do |raw|
+        packets.each do |packet|
+            if not packet.is_a?(PacketFu::Packet)
+                packet = PacketFu::Packet.parse(packet)
+            end
             incident_type = ""
-            packet = PacketFu::Packet.parse(raw)
             payload = packet.payload
             # Check TCPPackets for NULL/FIN/Xmas scan
             if packet.is_a?(PacketFu::TCPPacket)
