@@ -5,24 +5,24 @@ class Alarm
     def search_log(logfile)
         incidents = 0
         File.readlines(logfile).each do |line|
+            incident_type = ""
             if line =~ /Nikto/
-                incidents += 1
-                puts "Nikto"
+                incident_type = "Nikto scan"
             elsif line =~ /((php)+(myadmin))|(myadmin)(php)+/i
-                incidents += 1
-                puts "phpmyadmin"
+                incident_type = "Someone looking for phpMyAdmin"
             elsif line =~ /masscan/
-                incidents += 1
-                puts "masscan"
+                incident_type = "Masscan scan"
             elsif line =~ /nmap/i
-                incidents += 1
-                puts "nmap"
+                incident_type = "Nmap scan"
             elsif line =~ /(shellshock-scan)|(\(\)\s*\{\s*:;\s*\}\; ping -c)/
-                incidents += 1
-                puts "shellshock"
+                incident_type = "Someone attempting Shellshock"
             elsif line =~ /\/bin\/(bash|sh|perl)/
+                incident_type = "Someone trying to execute shellcode"
+            end
+            
+            if not incident_type.empty?
                 incidents += 1
-                puts "shellcode"
+                puts incident_type
             end
         end
     end
@@ -33,36 +33,35 @@ class Alarm
                                        :iface => interface,
                                        :promisc => true)
         stream.stream.each do |raw|
+            incident_type = ""
             packet = PacketFu::Packet.parse(raw)
+            payload = packet.payload
             puts "***************************************"
             if packet.is_a?(PacketFu::TCPPacket)
-                flags = packet.tcp_flags.to_i()
+                flags = packet.tcp_flags.to_i
                 if flags == 0
-                    incidents += 1
-                    puts "NULL"
+                    incident_type = "NULL scan"
                 elsif flags == 1
-                    incidents += 1
-                    puts "FIN"
+                    incident_type = "FIN scan"
                 elsif flags == 3
-                    incidents += 1
-                    puts "Maimon nmap scan"
-                elsif flags == 
+                    incident_type = "Maimon nmap scan"
                 elsif flags == 41
-                    incidents += 1
-                    puts "Xmas"
+                    incident_type"Xmas scan"
                 end
             end
-            if packet.payload() =~ /Nikto/
-                incidents += 1
-                puts "Nikto"
-            elsif packet.payload( =~ /nmap/
-                incidents += 1
-                puts "nmap"
-            elsif packet.payload() =~ \
-                 /(((3|4|5)\d{3})|6011)(((-| )?\d{4}){3})/
-                incidents += 1
-                puts "Credit Card"
+            if payload =~ /Nikto/
+                incident_type = "Nikto scan"
+            elsif payload =~ /nmap/
+                incident_type = "Nmap scan"
+            elsif payload =~ /(((3|4|5)\d{3})|6011)(((-| )?\d{4}){3})/
+                incidents = "Plaintext credit card information leak"
             end
+            if not incident_type.empty?
+                incidents += 1
+                puts incidents.to_s + ". ALERT: " + incident_type + \
+                    " is detected from " + packet.ip_saddr + " (" + \
+                    packet.proto[-1] + ") (" + payload + ")!"
+                end
         end
     end
 end
