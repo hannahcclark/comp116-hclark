@@ -123,7 +123,7 @@ if __FILE__ == $0
             options[:pcap] = pcap
         end
         opts.on("-h", "--help", "Display help") do
-            puts ops
+            puts opts
             exit
         end
     end
