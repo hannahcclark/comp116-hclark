@@ -22,7 +22,12 @@ class Alarm
             
             if not incident_type.empty?
                 incidents += 1
-                puts incident_type
+                components = line.scan(
+                    /(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3} (.*) (.*) (\[.*\]) (")(.+) (.+) (.+)(\/.*)(") (\d+) (\d+|-)/)[1]
+                puts incidents.to_s + ". ALERT: " + incident_type + 
+                    " is detected from " + component[0] + " (" + component[7] +
+                    ") (" + component[5] + component[6] + component[7] + 
+                    component[8]")!"
             end
         end
     end
