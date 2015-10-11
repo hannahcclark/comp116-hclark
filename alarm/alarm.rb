@@ -1,11 +1,18 @@
 require 'packetfu'
 require 'optparse'
 
+# Alarm class to group together different types of alarms
+#
 class Alarm
 
+    # Search contents of a log file in Apache common or combined log format
+    # for Nikto scan, Masscan, Nmap scans, shellcode, shellshock, and phpmyadmin
+    # stuff
+    #
     def search_log(logfile)
         incidents = 0
         File.readlines(logfile).each do |line|
+            # Scan each line and remember any incident found
             incident_type = ""
             if line =~ /Nikto/
                 incident_type = "Nikto scan"
@@ -20,32 +27,53 @@ class Alarm
             elsif line =~ /(\\x\d\d)+/
                 incident_type = "Someone trying to execute shellcode"
             end
-            
+            # Output if incident found
             if not incident_type.empty?
                 incidents += 1
+                # Breaks line into relevant components for Apache 
+                # common/combined log format
                 components = line.scan(
-                    /(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}) (.*) (.*) (\[.*\]) (")(.+) (.+) (.+)(\/.*)(") (\d+) (\d+|-)/)
+                    /(\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}) (.*) (.*) (\[.*\]) (")(.*)(") (\d+) (\d+|-)/)
                 if components.empty?
                     abort("Bad File Format: Apache common log or " + 
                           "combined log formats only")
                 else
                     components = components[0]
                 end
-                #0 is IP, 7 is protocol without version, 5-8 are full payload
-                puts incidents.to_s + ". ALERT: " + incident_type + 
-                    " is detected from " + components[0] + " (" + 
-                    components[7] + ") (\"" + components[5] + " " + 
-                    components[6] + " " + components[7] + components[8] + "\")!"
+                # index 5 is payload
+                # Need to scan separately because shellcode causes payload
+                # format to change
+                payload = components[5].scan(/(.+) (.+) (.+)(\/.*)/)
+                # If not possible to break payload into format with protocol
+                if payload.empty?
+                    # index 0 is IP, 5 is full payload
+                    puts incidents.to_s + ". ALERT: " + incident_type +
+                        " is detected from " + components[0] + 
+                        " (UNKNOWN) (\"" + components[5] + "\")!"
+                # Otherwise, use protocol found and rebuild payload in message
+                else
+                    # index 0 is IP, payload 2 is protocol, 0-3 is full payload
+                    payload = payload[0]
+                    puts incidents.to_s + ". ALERT: " + incident_type + 
+                        " is detected from " + components[0] + " (" + 
+                        payload[2] + ") (\"" + payload[0] + " " + 
+                        payload[1] + " " + payload[2] + payload[3] + "\")!"
+                end
             end
         end
     end
 
+    # Search through packets, either a live stream or list from a pcap file for
+    # incidents, including Nmap NULL, FIN, and Xmas scans, other somewhat
+    # obvious Nmap scans, Nikto scans, and plaintext credit card leaks.
+    #
     def search_packets(packets)
         incidents = 0
         packets.each do |raw|
             incident_type = ""
             packet = PacketFu::Packet.parse(raw)
             payload = packet.payload
+            # Check TCPPackets for NULL/FIN/Xmas scan
             if packet.is_a?(PacketFu::TCPPacket)
                 flags = packet.tcp_flags.to_i
                 if flags == 0
@@ -53,9 +81,10 @@ class Alarm
                 elsif flags == 1
                     incident_type = "FIN scan"
                 elsif flags == 41
-                    incident_type"Xmas scan"
+                    incident_type = "Xmas scan"
                 end
             end
+            # Check payload for other incidents appearing there
             if payload =~ /Nikto/
                 incident_type = "Nikto scan"
             elsif payload =~ /Nmap/
@@ -63,6 +92,7 @@ class Alarm
             elsif payload =~ /(((3|4|5)\d{3})|6011)(((-| )?\d{4}){3})/
                 incidents = "Plaintext credit card information leak"
             end
+            # Output if incident found
             if not incident_type.empty?
                 incidents += 1
                 puts incidents.to_s + ". ALERT: " + incident_type + \
@@ -73,11 +103,14 @@ class Alarm
     end
 end
 
+# Separates off script from always running, so that the class could be used
+# by other modules without running the script.
 if __FILE__ == $0
     alarm = Alarm.new()
     options = {:log => nil, :pcap => nil}
     parser = OptionParser.new do|opts|
-        opts.banner = "Usage: alarm.rb [options]"
+        opts.banner = "Usage: alarm.rb [options]\nDefaults to sniffing " + 
+            "packets when no option specified."
         opts.on("-r", "--read-log logfile", "Log file to scan for incidents") \
         do |logfile|
             options[:log] = logfile
@@ -90,20 +123,22 @@ if __FILE__ == $0
             puts ops
             exit
         end
+    end
     parser.parse!
 
+    # Look through options provided. If both pcap and logfile are given,
+    # search both. The incident count will be reset between files
     if options[:log]
-        alarm.search_log(ARGV[1])
-    elsif options[:pcap]
-        alarm.search_packets(PacketFu::PcapFile.read_packets(pcap))
-    else
-         stream = PacketFu::Capture.new(:start => true,
-                                        :iface => "eth0",
-                                        :promisc => true)
-
+        alarm.search_log(options[:log])
+    end
+    if options[:pcap]
+        alarm.search_packets(PacketFu::PcapFile.read_packets(options[:pcap]))
+    end
+    # Default to sniffing network traffic if neither option provided
+    if not (options[:pcap] or options[:log])
         alarm.search_packets(PacketFu::Capture.new(:start => true,
-                                                   :iface => interface,
-                                                    :promisc => true).stream)
+                                                   :iface => "eth0",
+                                                   :promisc => true).stream)
     end
 end
 
