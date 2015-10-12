@@ -71,6 +71,7 @@ class Alarm
     def search_packets(packets)
         incidents = 0
         packets.each do |packet|
+            # Check for raw packets
             if not packet.is_a?(PacketFu::Packet)
                 packet = PacketFu::Packet.parse(packet)
             end
