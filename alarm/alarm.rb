@@ -93,8 +93,8 @@ class Alarm
                 incident_type = "Nikto scan"
             elsif payload =~ /Nmap/
                 incident_type = "Nmap scan"
-            elsif payload =~ /(((3|4|5)\d{3})|6011)(((-| )?\d{4}){3})/
-                incidents = "Plaintext credit card information leak"
+            elsif payload =~ /((([345]\d{3})|6011)([ -]?\d{4}){3})/
+                incident_type = "Plaintext credit card information leak"
             end
             # Output if incident found
             if not incident_type.empty?
