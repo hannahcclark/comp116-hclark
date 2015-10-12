@@ -44,12 +44,12 @@ class Alarm
                 # Need to scan separately because shellcode causes payload
                 # format to change
                 payload = components[5].scan(/(.+) (.+) (.+)(\/.*)/)
-                # If not possible to break payload into format with protocol
+                # If not possible to get protocol in payload assume HTTP
                 if payload.empty?
                     # index 0 is IP, 5 is full payload
                     puts incidents.to_s + ". ALERT: " + incident_type +
                         " is detected from " + components[0] + 
-                        " (UNKNOWN) (\"" + components[5] + "\")!"
+                        " (HTTP) (\"" + components[5] + "\")!"
                 # Otherwise, use protocol found and rebuild payload in message
                 else
                     # index 0 is IP, payload 2 is protocol, 0-3 is full payload
@@ -89,9 +89,9 @@ class Alarm
                 end
             end
             # Check payload for other incidents appearing there
-            if payload =~ /Nikto/
+            if payload =~ /(Nikto)|(\\4e\\69\\6b\\74\\6f)/
                 incident_type = "Nikto scan"
-            elsif payload =~ /Nmap/
+            elsif payload =~ /(Nmap)|(\\4e\\6d\\61\\70)/
                 incident_type = "Nmap scan"
             elsif payload =~ /((([345]\d{3})|6011)([ -]?\d{4}){3})/
                 incident_type = "Plaintext credit card information leak"
